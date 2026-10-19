@@ -41,7 +41,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //Write your code here//
 
-//CHALLENGE 1: GET All posts
 // app.get("/api/post/", (req, res) => {
 //   res.json(posts);
 // });
@@ -52,27 +51,54 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //     posts: response.data,
 //   });
 // });
-app.get("/", (req, res) => {
-  res.render("index.ejs", {
-    posts: posts,
-  });
+//CHALLENGE 1: GET All posts
+app.get("/posts", (req, res) => {
+  console.log(posts);
+  res.json(posts);
 });
 //CHALLENGE 2: GET a specific post by id
 app.get("/posts/:id", (req, res) => {
   const temp_id = parseInt(req.params.id);
   const present = posts.find((post) => post.id === temp_id);
   if (!present) return res.status(404).json({ message: "Post not found" });
-  res.render("modify.ejs", {
-    post: present,
-    heading: "Edit post",
-  });
+  res.json(present);
 });
 
 //CHALLENGE 3: POST a new post
+app.post("/posts", (req, res) => {
+  // const newId = (lastId += 1);
+  const newItem = {
+    id: posts.length + 1,
+    title: req.body.title,
+    content: req.body.content,
+    author: req.body.author,
+    date: new Date(),
+  };
+  // lastId = newId;
+  posts.push(newItem);
+  res.status(201).json(newItem);
+});
 
 //CHALLENGE 4: PATCH a post when you just want to update one parameter
+app.patch("/posts/:id", (req, res) => {
+  const temp_id = parseInt(req.params.id);
+  const newItem = posts.find((post) => post.id === temp_id);
+  if (!newItem) return res.status(404).json({ message: "post not found" });
+  if (req.body.title !== undefined) newItem.title = req.body.title;
+  if (req.body.content !== undefined) newItem.content = req.body.content;
+  if (req.body.author !== undefined) newItem.author = req.body.author;
+  res.json(newItem);
+});
 
 //CHALLENGE 5: DELETE a specific post by providing the post id.
+
+app.delete("/posts/:id", (req, res) => {
+  const index = posts.findIndex((p) => p.id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).json({ message: "Post not found" });
+
+  posts.splice(index, 1);
+  res.json({ message: "Post deleted" });
+});
 
 app.listen(port, () => {
   console.log(`API is running at http://localhost:${port}`);
